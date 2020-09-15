@@ -1,0 +1,309 @@
+*{
+    margin:0px;
+    padding:0px;
+    font-family:'philosopher',serif;
+}
+body{
+    background-color: rgb(219, 219, 219);
+}
+.header{
+
+    height:300px;
+    background-image: url(IMG_7810_Original.JPG);
+
+    background-size: cover;
+    background-position: center top;
+    background-repeat:no-repeat;
+}
+.header-str{
+    color: white;
+    text-align: center;
+    padding-top: 3%;
+    font-size: 70px;
+    font-weight: lighter;
+}
+.wrapper{
+    max-width: 1200px;
+    margin:0 auto;
+    padding:0 4%;
+}
+.main_nav{
+    display: flex;
+    text-transform: uppercase;
+    font-size: 15px;
+    padding-left: 3%;
+    padding-top: 20px;
+    list-style: none;
+}
+.main_nav li{
+    padding-left: 3%;
+    padding-top: 20px;
+}
+
+.header a{
+   color: white;
+   text-decoration: none;
+   font-family:'philosopher',serif;
+   padding: 5px;
+   border-radius: 5px;
+}
+
+.header a:hover{
+    color:gray;
+}
+.main{
+padding-left: 30%;
+min-height: 430px;
+}
+.main_str{
+    margin-top: 40px;
+    margin-bottom: 20px;
+}
+.main h4{
+    margin-bottom: 20px;
+}
+
+/*quiz*/
+.quiz{
+    margin-left: 60px;
+}
+/*最初のページ*/
+.main_top{
+    height: 450px;
+}
+.top_str{
+    margin-left: 31%;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+.explain{
+    margin-left: 36%;
+    text-decoration: none;
+}
+.explain a{
+    color: rgb(53, 51, 51);
+    text-decoration: none;
+}
+.explain a:hover{
+    color: gray;
+}
+.explain{
+    margin-bottom: 50px;
+}
+
+
+/*掲示板*/
+.bord_contents{
+    display: flex;
+    margin-top: 30px;
+}
+
+.article{
+    width: 84%;
+    margin-left: 20%;
+}
+.aside{
+    width: 16%;
+    margin-right: 20px;
+}
+.bord_contents input{
+    width: 250px;
+}
+textarea{
+    margin-left: 21px;
+    width: 250px;
+    height: 150px;
+}
+table{
+    margin-top: 30px;
+}
+.submit{
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+.delete{
+    margin-top: 30px;
+}
+.aside h2{
+    margin-left: 20px;
+}
+.aside p{
+    font-size: 0.75rem;
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+
+
+/*login*/
+.resister{
+    margin-left: 21px;
+    text-decoration: none;
+}
+.resister a{
+    color: rgb(53, 51, 51);
+    text-decoration: none;
+}
+.resister a:hover{
+    color: gray;
+}
+.login_icon{
+    color: rgb(53, 51, 51);
+    text-decoration: none;
+    margin-left: 20px;
+
+}
+.resister_error{
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+.resister_str{
+color: white;
+text-align: center;
+padding-top: 9%;
+font-size: 70px;
+font-weight: lighter;
+}
+.login_error{
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+
+
+
+
+.question{
+    margin-bottom: 30px;
+}
+.question h4{
+    margin-bottom: 10px;
+}
+.question p{
+    margin-bottom: 10px;
+}
+.question p, input{
+    margin-left: 20px;
+}
+
+.submit form{
+    margin-left: 0;
+    margin-bottom: 30px;
+}
+
+
+
+
+/*答えのページ*/
+.main{
+    height: auto;
+}
+.result{
+    margin-bottom: 8px;
+}
+.open {
+    cursor:pointer;
+    text-decoration: none;
+    color: rgb(116, 89, 89);
+}
+span{
+    color: red;
+}
+.results_number{
+    margin-bottom: 20px;   
+}
+.answer{
+    margin-bottom: 40px;   
+}
+
+.contents{
+    border:  1px solid gray ;
+    margin-top: 20px;
+    padding: 10px;
+}
+
+.again{
+    text-decoration: none;
+    color: rgb(116, 89, 89);
+    padding: 3px;
+    border-radius: 3px;
+}
+.main a:hover{
+    color:gray;
+}
+
+
+/*footer*/
+.footer{
+    height: 100px;
+    background-color: rgb(41, 39, 39);
+    margin-top: 30px;
+}
+
+
+.footer a{
+    color: white;
+    text-decoration: none;
+    font-family:'philosopher',serif;
+    padding: 5px;
+    border-radius: 5px;
+ }
+
+.footer a:hover{
+    color:gray;
+}
+
+@media(max-width: 960px){
+    .main{
+        padding-left: 0%;
+    }
+
+    .header-str{
+        padding-top: 10%;
+        font-size: 3.5rem;
+        text-align: center;
+    }
+
+    .answer_main{
+        margin-left: 8%;
+    }
+
+    .login_main{
+        margin-left: 8%;
+    }
+
+    .top_str, .explain{
+        margin-left: 8%;
+    }
+
+
+    .resister_str{
+        padding-top: 10%;
+        font-size: 3.5rem;
+        text-align: center;
+    }
+
+    .bord_contents{
+        flex-direction: column;
+    }
+    .article{
+        margin-left: 3%;
+    }
+    .article,
+    .aside{
+        width: 100%;
+    }
+}
+@media(max-width: 600px){
+
+    .resister_str{
+        padding-top: 20%;
+        font-size: 3.5rem;
+        text-align: center;
+    }
+    .header,
+    .footer a{
+        font-size: 0.75rem;
+    }
+}
