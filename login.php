@@ -53,7 +53,7 @@ $pdo=new PDO($dsn, $user, $password, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_WAR
 
         <form action="" method=post>
         <input type="text" name="address" placeholder="メールアドレス">
-        <input type="text" name="pass" placeholder="パスワード">
+        <input type="password" name="pass" placeholder="パスワード">
         <input type="submit" value="ログイン">
         </form>
 
