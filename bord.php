@@ -1,5 +1,6 @@
-
 <?php
+
+
 
 //ログインしていない場合ログイン画面に戻る
 session_start();
@@ -9,10 +10,38 @@ if (!isset($_SESSION["user"])){
 }
 
     //データベース接続
-    $dsn='データベース名';
+    $dsn='DB名';
     $user='ユーザー名';
     $password='パスワード';
     $pdo=new PDO($dsn, $user, $password, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING));
+
+    /*
+    $sql = 'DROP TABLE bord';
+    $stmt = $pdo->query($sql);
+
+    $sql = 'DROP TABLE pre_likes';
+    $stmt = $pdo->query($sql);
+
+    $sql = 'DROP TABLE likes';
+    $stmt = $pdo->query($sql);
+    */
+
+
+     //pre_likesのテーブル作成
+     $sql = "CREATE TABLE IF NOT EXISTS pre_likes"
+     ." ("
+     . "id INT,"
+     . "address VARCHAR(200)"
+     .");";
+    $stmt = $pdo->query($sql);
+
+    //likesのテーブル作成
+    $sql = "CREATE TABLE IF NOT EXISTS likes"
+    ." ("
+    . "id INT AUTO_INCREMENT PRIMARY KEY,"//投稿番号
+    . "num int"//いいね数
+    .");";
+     $stmt = $pdo->query($sql);
 
     //掲示板テーブル作成
     $sql="CREATE TABLE IF NOT EXISTS bord"
@@ -22,7 +51,7 @@ if (!isset($_SESSION["user"])){
     ."comment TEXT,"//コメントはテキスト
     ."detail TEXT,"
     ."date TEXT,"//date関数で取得してるからテキストで行けそう
-    ."pass char(32)"//パス３２文字
+    ."address char(32)"//パス３２文字
     .");";
     $stmt = $pdo->query($sql);
 
@@ -37,52 +66,123 @@ if (!isset($_SESSION["user"])){
         foreach ($results as $row) {
             if ($address==$row["address"]) {
                 $name= $row["name"];
-                $pass=$row["pass"];
             }
         }
 
 
     //書き込み用のコード
-    if (!empty($_POST)) {
-        if (!empty($_POST["name"]&& $_POST["comment"] && $_POST["detail"] && $_POST["pass"])) {
-            $name = $_POST["name"];
+
+    //編集時の書き込み
+    if (!empty($_POST{"post"})) 
+        if (!empty($_POST["comment"] && $_POST["detail"] && $_POST["edit_num"])) {
+            $date=date("Y/m/d H:i:s");
+            $comment = $_POST["comment"];
+            $detail=$_POST["detail"];
+            $id = $_POST['edit_num'];
+            $sql = 'UPDATE bord SET comment=:comment, detail=:detail, date=:date WHERE id=:id';
+            $stmt = $pdo -> prepare($sql);
+            $stmt ->bindParam(':comment',$comment,PDO::PARAM_STR);
+            $stmt ->bindParam(':detail',$detail,PDO::PARAM_STR);
+            $stmt ->bindParam(':date',$date,PDO::PARAM_STR);
+            $stmt ->bindParam(':id',$id,PDO::PARAM_STR);
+            $stmt -> execute();
+    //通常の書き込み
+        }elseif(!empty($_POST["comment"] && $_POST["detail"])) {
             $comment = $_POST["comment"];
             $detail=$_POST["detail"];
             $date=date("Y/m/d H:i:s");
-            $pass=$_POST["pass"];
-            $sql = $pdo -> prepare("INSERT INTO bord (name, comment, detail, pass, date) VALUES (:name, :comment, :detail, :pass, :date)");
+            $sql = $pdo -> prepare("INSERT INTO bord (name, comment, detail, address, date) VALUES (:name, :comment, :detail, :address, :date)");
             $sql -> bindParam(':name', $name, PDO::PARAM_STR);
             $sql -> bindParam(':comment', $comment, PDO::PARAM_STR);
             $sql -> bindParam(':detail', $detail, PDO::PARAM_STR);
             $sql -> bindParam(':date', $date, PDO::PARAM_STR);
-            $sql -> bindParam(':pass', $pass, PDO::PARAM_STR);
+            $sql -> bindParam(':address', $address, PDO::PARAM_STR);
+            $sql -> execute();
+            $sql = $pdo -> prepare("INSERT INTO likes (num) VALUES (0)");
             $sql -> execute();
         } else {
             $error= "全項目を入力してください。";
         }
-    }
+    
 
     //削除用のコード
-    if (!empty($_GET)) {
-        if (!empty($_GET["delete"] &&!empty($_GET["pass2"]))) {
-            $id = $_GET["delete"];
-            $sql='SELECT * FROM bord WHERE id=:id';//id番目のもの全て
+    if (!empty($_POST["delete_id"])) {
+            $id = $_POST["delete"];
+            $sql='DELETE FROM bord WHERE id=:id';//id番目のもの全て
             $stmt = $pdo->prepare($sql);
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
-            $results = $stmt->fetchAll();
-            foreach ($results as $row) {
-                if ($_GET["pass2"]==$row['pass']) {//パスが一致する時
-                    $sql = 'delete from bord where id=:id';//id番目を削除
-                    $stmt = $pdo->prepare($sql);
-                    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-                    $stmt->execute();
-                } else {
-                    $pass_differ ="あなたの投稿ではありません。";
-                }
+        }
+
+    //編集情報をテキストボックスに表示するためコード
+    if(!empty($_POST["edit_id"])){
+        $id=$_POST["edit"];
+        $sql = "SELECT * FROM bord";
+        $stmt = $pdo -> query($sql);
+        $results = $stmt->fetchAll();
+        foreach($results as $row){
+            if($row['id']==$id){
+                $edit_num = $row['id'];
+                $edit_comment=$row['comment'];
+                $edit_detail=$row['detail'];
             }
         }
     }
+
+
+     //いいね機能
+        $sql = 'SELECT * FROM pre_likes';
+        $stmt = $pdo->query($sql);
+        $results = $stmt->fetchAll();
+        if (!empty($_POST["submit_likes"])) {
+            if (!empty($_POST["address_likes"])) {
+                foreach ($results as $row) {
+                    //一致するアドレスある時→いいねの取り消し
+                    if ($_POST["address_likes"]==$row["address"]&&$_POST["id"]==$row["id"]) {
+                        $confirm="確認";//この変数があるかないかですでにいいねしてるか確認
+                    }
+                }
+            }
+                
+                if (!empty($confirm)) {
+                    $address = $_POST["address_likes"];
+                    $sql = 'DELETE FROM pre_likes WHERE address=:address';//いいねの取り消し
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->bindParam(':address', $address, PDO::PARAM_STR);
+                    $stmt->execute();
+                } else {
+                    //いいねする
+                    $sql = $pdo -> prepare("INSERT INTO pre_likes (id, address) VALUES (:id, :address)");
+                    $address = $_POST["address_likes"];
+                    $id = $_POST["id"];
+                    $sql -> bindParam(':address', $address, PDO::PARAM_STR);
+                    $sql -> bindParam(':id', $id, PDO::PARAM_INT);
+                    $sql -> execute();
+                }
+        }
+        
+    
+
+            //いいね数のカウント
+            if (!empty($_POST["id"])) {
+                //前のカウント数一回消す
+                $id = $_POST["id"];
+                $sql = 'DELETE FROM likes WHERE id=:id';
+                $stmt = $pdo->prepare($sql);
+                $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+                $stmt->execute();
+                //pre_likesのidの数を数える
+                $stmt = $pdo -> prepare("SELECT COUNT(id) FROM pre_likes WHERE id=:id");
+                $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+                $stmt -> execute();
+                $num = (int)$stmt->fetchColumn();
+                //カウント結果書き込み
+                $sql = $pdo -> prepare("INSERT INTO likes (id,num) VALUES (:id,:num)");
+                $sql -> bindParam(':id', $id, PDO::PARAM_INT);
+                $sql -> bindParam(':num', $num, PDO::PARAM_INT);
+                $sql -> execute();
+            }
+        
 
 
 
@@ -121,24 +221,22 @@ if (!isset($_SESSION["user"])){
 
         <div class="article">
             <h2>投稿</h2>
-            <form action="" method="post">
+            <form action="" class="post" method="post">
                 <table>
                     <tr>
                         <td>おすすめアプリ or 勉強法</td>
-                        <td><input type="text" name="comment"></td>
+                        <td><input type="text" name="comment" value = "<?php if(!empty($edit_comment)){echo $edit_comment;}?>"></td>
                     </tr>
 
                     <tr>
                         <td>アプリ内容 or 勉強法の詳細</td>
-                        <td><textarea name="detail" id="" cols="30" rows="10"></textarea></td>
+                        <td><textarea name="detail" id="" cols="30" rows="10"><?php if(!empty($edit_detail)){echo $edit_detail;}?></textarea></td>
                     </tr>
 
                 </table>
+                <input type="text" name="edit_num" value="<?php if(!empty($edit_num)){echo $edit_num;}?>">
 
-                <!--投稿フォーム-->
-                <input type="hidden" name="name" value="<?php echo $name;?>">
-                <input type="hidden" name="pass" value="<?php echo $pass;?>">
-                <input type="submit" class="submit" value="投稿">
+                <input type="submit" name="post" value="投稿">
 
                 <?php
 
@@ -152,39 +250,36 @@ $sql = 'SELECT * FROM bord';
 $stmt = $pdo->query($sql);
 $results = $stmt->fetchAll();
     foreach ($results as $row) {
-        //$rowの中にはテーブルのカラム名が入る
-        echo '<br>'.$row['id'].',';
+        //内容の表示
+        $row_id=$row['id'];
+        echo '<br>'.$row_id.',';
         echo $row['name'].'<br>';
         echo 'おすすめアプリ or 勉強法'.'<br>';
         echo $row['comment'].'<br>';
         echo '詳細'.'<br>';
         echo $row['detail'].'<br>';
         echo $row['date'].'<br>';
+        if ($row["address"]==$address) {
+            echo "<div class='delete_edit'><form action='' method='post'><input type='hidden' name='edit' value='$row_id'><input type='submit' name='edit_id' class='submit' value='編集'><input type='hidden' name='delete' value='$row_id'><input type='submit' name='delete_id'  value='削除'></form></div>";
+        }
+
+        //いいねの表示
+        $sql = 'SELECT * FROM likes';
+            $stmt = $pdo->query($sql);
+            $likes_results = $stmt->fetchAll();
+            foreach ($likes_results as $likes_row) {
+                $Clikes=$likes_row["num"];
+                if ($row['id']==$likes_row['id']) {
+                    echo "<div class='answer'><form method='post'><input type='hidden' name='id' value='$row_id'><input type='hidden' name='address_likes' value='$address'><input type='submit' class='far' name='submit_likes' value='&#xf164; いいね$Clikes'> </form><br></div>";
+                }
+            }
+
         echo '<hr>';
     }
 ?>
 
             </form>
         </div><!--article-->
-
-        <!--削除フォーム-->
-        <div class="aside">
-            <h2>削除</h2>
-            <p>あなたの投稿が削除可能です。</p>
-            <form action="" method="get" class="delete">
-                <input type="text" name="delete" placeholder="削除対象番号">
-                <input type="hidden" name="pass2" value="<?php echo $pass;?>"><br>
-                <input type="submit" value="削除" class="submit_delete">
-            </form>
-              <p>
-                <?php
-                    if(isset($pass_differ)){
-                        echo $pass_differ;//パスワード違う
-                    }
-                ?>
-              </p>
-
-        </div>
     </div>
 
 
