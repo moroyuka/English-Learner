@@ -156,4 +156,5 @@ if (!isset($_SESSION["user"])){
         </nav>
     </section>
 </body>
+<script src="menu.js"></script>
 </html>
