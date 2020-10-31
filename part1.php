@@ -31,6 +31,7 @@ if (!isset($_SESSION["user"])){
             </ul>
         </nav>
         <h1 class="header-str">English Learner<h1>
+        <div id="page-top">↑page-top</div>
     </section>
 
 
