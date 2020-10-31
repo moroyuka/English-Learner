@@ -39,7 +39,7 @@ if (!isset($_SESSION["user"])){
 
         <div class="explain">
             <h2><a href="site.php">Quiz</a></h2>
-            <p>11問のクイズに挑戦！</p>
+            <p>20問のクイズに挑戦！</p>
         </div>
 
         <div class="explain">
