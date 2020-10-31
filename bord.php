@@ -1,31 +1,20 @@
+
 <?php
 
 
 
 //ログインしていない場合ログイン画面に戻る
 session_start();
-if (!isset($_SESSION["user"])){
+if (!isset($_SESSION["user"])) {
     header('location: login.php');
     exit();
 }
 
     //データベース接続
-    $dsn='DB名';
+    $dsn='データベース名';
     $user='ユーザー名';
     $password='パスワード';
     $pdo=new PDO($dsn, $user, $password, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING));
-
-    /*
-    $sql = 'DROP TABLE bord';
-    $stmt = $pdo->query($sql);
-
-    $sql = 'DROP TABLE pre_likes';
-    $stmt = $pdo->query($sql);
-
-    $sql = 'DROP TABLE likes';
-    $stmt = $pdo->query($sql);
-    */
-
 
      //pre_likesのテーブル作成
      $sql = "CREATE TABLE IF NOT EXISTS pre_likes"
@@ -51,7 +40,7 @@ if (!isset($_SESSION["user"])){
     ."comment TEXT,"//コメントはテキスト
     ."detail TEXT,"
     ."date TEXT,"//date関数で取得してるからテキストで行けそう
-    ."address char(32)"//パス３２文字
+    ."address VARCHAR(200)"
     .");";
     $stmt = $pdo->query($sql);
 
@@ -61,7 +50,7 @@ if (!isset($_SESSION["user"])){
     $sql='SELECT * FROM resister WHERE address=:address';
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':address', $address, PDO::PARAM_INT);
-    $stmt->execute();                         
+    $stmt->execute();
     $results = $stmt->fetchAll();
         foreach ($results as $row) {
             if ($address==$row["address"]) {
@@ -73,7 +62,7 @@ if (!isset($_SESSION["user"])){
     //書き込み用のコード
 
     //編集時の書き込み
-    if (!empty($_POST{"post"})) 
+    if (!empty($_POST{"post"})) {
         if (!empty($_POST["comment"] && $_POST["detail"] && $_POST["edit_num"])) {
             $date=date("Y/m/d H:i:s");
             $comment = $_POST["comment"];
@@ -81,13 +70,13 @@ if (!isset($_SESSION["user"])){
             $id = $_POST['edit_num'];
             $sql = 'UPDATE bord SET comment=:comment, detail=:detail, date=:date WHERE id=:id';
             $stmt = $pdo -> prepare($sql);
-            $stmt ->bindParam(':comment',$comment,PDO::PARAM_STR);
-            $stmt ->bindParam(':detail',$detail,PDO::PARAM_STR);
-            $stmt ->bindParam(':date',$date,PDO::PARAM_STR);
-            $stmt ->bindParam(':id',$id,PDO::PARAM_STR);
+            $stmt ->bindParam(':comment', $comment, PDO::PARAM_STR);
+            $stmt ->bindParam(':detail', $detail, PDO::PARAM_STR);
+            $stmt ->bindParam(':date', $date, PDO::PARAM_STR);
+            $stmt ->bindParam(':id', $id, PDO::PARAM_STR);
             $stmt -> execute();
-    //通常の書き込み
-        }elseif(!empty($_POST["comment"] && $_POST["detail"])) {
+        //通常の書き込み
+        } elseif (!empty($_POST["comment"] && $_POST["detail"])) {
             $comment = $_POST["comment"];
             $detail=$_POST["detail"];
             $date=date("Y/m/d H:i:s");
@@ -103,25 +92,26 @@ if (!isset($_SESSION["user"])){
         } else {
             $error= "全項目を入力してください。";
         }
+    }
     
 
     //削除用のコード
     if (!empty($_POST["delete_id"])) {
-            $id = $_POST["delete"];
-            $sql='DELETE FROM bord WHERE id=:id';//id番目のもの全て
-            $stmt = $pdo->prepare($sql);
-            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-            $stmt->execute();
-        }
+        $id = $_POST["delete"];
+        $sql='DELETE FROM bord WHERE id=:id';//id番目のもの全て
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+    }
 
     //編集情報をテキストボックスに表示するためコード
-    if(!empty($_POST["edit_id"])){
+    if (!empty($_POST["edit_id"])) {
         $id=$_POST["edit"];
         $sql = "SELECT * FROM bord";
         $stmt = $pdo -> query($sql);
         $results = $stmt->fetchAll();
-        foreach($results as $row){
-            if($row['id']==$id){
+        foreach ($results as $row) {
+            if ($row['id']==$id) {
                 $edit_num = $row['id'];
                 $edit_comment=$row['comment'];
                 $edit_detail=$row['detail'];
@@ -144,21 +134,21 @@ if (!isset($_SESSION["user"])){
                 }
             }
                 
-                if (!empty($confirm)) {
-                    $address = $_POST["address_likes"];
-                    $sql = 'DELETE FROM pre_likes WHERE address=:address';//いいねの取り消し
-                    $stmt = $pdo->prepare($sql);
-                    $stmt->bindParam(':address', $address, PDO::PARAM_STR);
-                    $stmt->execute();
-                } else {
-                    //いいねする
-                    $sql = $pdo -> prepare("INSERT INTO pre_likes (id, address) VALUES (:id, :address)");
-                    $address = $_POST["address_likes"];
-                    $id = $_POST["id"];
-                    $sql -> bindParam(':address', $address, PDO::PARAM_STR);
-                    $sql -> bindParam(':id', $id, PDO::PARAM_INT);
-                    $sql -> execute();
-                }
+            if (!empty($confirm)) {
+                $address = $_POST["address_likes"];
+                $sql = 'DELETE FROM pre_likes WHERE address=:address';//いいねの取り消し
+                $stmt = $pdo->prepare($sql);
+                $stmt->bindParam(':address', $address, PDO::PARAM_STR);
+                $stmt->execute();
+            } else {
+                //いいねする
+                $sql = $pdo -> prepare("INSERT INTO pre_likes (id, address) VALUES (:id, :address)");
+                $address = $_POST["address_likes"];
+                $id = $_POST["id"];
+                $sql -> bindParam(':address', $address, PDO::PARAM_STR);
+                $sql -> bindParam(':id', $id, PDO::PARAM_INT);
+                $sql -> execute();
+            }
         }
         
     
@@ -196,6 +186,7 @@ if (!isset($_SESSION["user"])){
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>quiz</title>
+    <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
     <link rel="stylesheet" href="site.css">
 </head>
 
@@ -217,28 +208,33 @@ if (!isset($_SESSION["user"])){
 
 
 
-    <div class="bord_contents wrapper">
-
-        <div class="article">
-            <h2>投稿</h2>
+    <div class="wrapper bord">
+            <h2>Bulletin Bord</h2>
             <form action="" class="post" method="post">
                 <table>
                     <tr>
                         <td>おすすめアプリ or 勉強法</td>
-                        <td><input type="text" name="comment" value = "<?php if(!empty($edit_comment)){echo $edit_comment;}?>"></td>
+                        <td><input type="text" name="comment" value = "<?php if (!empty($edit_comment)) {
+    echo $edit_comment;
+}?>"></td>
                     </tr>
 
                     <tr>
                         <td>アプリ内容 or 勉強法の詳細</td>
-                        <td><textarea name="detail" id="" cols="30" rows="10"><?php if(!empty($edit_detail)){echo $edit_detail;}?></textarea></td>
+                        <td><textarea name="detail" id="" cols="30" rows="10"><?php if (!empty($edit_detail)) {
+    echo $edit_detail;
+}?></textarea></td>
                     </tr>
 
                 </table>
-                <input type="text" name="edit_num" value="<?php if(!empty($edit_num)){echo $edit_num;}?>">
+                <input type="hidden" name="edit_num" value="<?php if (!empty($edit_num)) {
+    echo $edit_num;
+}?>">
 
-                <input type="submit" name="post" value="投稿">
+                <input type="submit" name="post" value="投稿" class="main_post">
+                <h2>投稿</h2>
 
-                <?php
+<?php
 
 
 if (isset($error)) {
@@ -265,21 +261,20 @@ $results = $stmt->fetchAll();
 
         //いいねの表示
         $sql = 'SELECT * FROM likes';
-            $stmt = $pdo->query($sql);
-            $likes_results = $stmt->fetchAll();
-            foreach ($likes_results as $likes_row) {
-                $Clikes=$likes_row["num"];
-                if ($row['id']==$likes_row['id']) {
-                    echo "<div class='answer'><form method='post'><input type='hidden' name='id' value='$row_id'><input type='hidden' name='address_likes' value='$address'><input type='submit' class='far' name='submit_likes' value='&#xf164; いいね$Clikes'> </form><br></div>";
-                }
+        $stmt = $pdo->query($sql);
+        $likes_results = $stmt->fetchAll();
+        foreach ($likes_results as $likes_row) {
+            $Clikes=$likes_row["num"];
+            if ($row['id']==$likes_row['id']) {
+                echo "<form method='post' ><input type='hidden' name='id' value='$row_id'><input type='hidden' name='address_likes' value='$address'><input type='submit' class='far good_css' name='submit_likes' value='&#xf164; いいね$Clikes'> </form><br>";
             }
+        }
 
         echo '<hr>';
     }
 ?>
 
             </form>
-        </div><!--article-->
     </div>
 
 
