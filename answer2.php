@@ -1,6 +1,24 @@
 <?php
+  $dsn='データベース名';
+  $user='ユーザー名';
+  $password='パスワード';
+    $pdo=new PDO($dsn, $user, $password, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING));
+    
     session_start();
     
+    //address元にユーザの登録情報を取得
+    $address=$_SESSION["user"]["address"];
+    $sql='SELECT * FROM resister WHERE address=:address';
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':address', $address, PDO::PARAM_INT);
+    $stmt->execute();                         
+    $results = $stmt->fetchAll();
+    foreach ($results as $row) {
+        if ($address==$row["address"]) {
+            $name= $row["name"];
+        }
+    }
+
     //sessionなかったら戻る
     if (!isset($_SESSION["user"])){
         header('location: login.php');
@@ -138,14 +156,28 @@
 
 
     //結果コメント
-    $results=count($number);//配列の中身数える（正答数）
-    if ($results>=8) {//8問以上
+    $score=count($number);//配列の中身数える（正答数）
+    if ($score>=8) {//8問以上
         $message="すごい！";
-    } elseif ($results>=6) {//6問以上
+    } elseif ($score>=6) {//6問以上
         $message="もう一歩！";
     } else {
         $message="頑張ろう！";
     }
+
+    $sql = "CREATE TABLE IF NOT EXISTS result2"
+    ."("
+    ."address VARCHAR(200),"
+    ."score INT(2)"
+    .");";
+    $stmt = $pdo->query($sql);
+    
+    $sql = $pdo -> prepare("INSERT INTO result2(address, score) VALUES(:address, :score)");
+    $sql -> bindParam(':address', $address, PDO::PARAM_STR);
+    $sql -> bindParam(':score', $score, PDO::PARAM_STR);   
+    $sql -> execute();
+
+
     ?>
 
 <!DOCTYPE html>
@@ -172,12 +204,13 @@
         </ul>
         </nav>
         <h1 class="header-str">English Learner<h1>
+        <div id="page-top">↑page-top</div>
 </section>
 
 <section class="main wrapper answer_main">
         <h1 class="main_str">解答＆解説</h1>
 
-        <h2 class="results_number">10問中<span><?php echo $results;?></span>問正解！<?php echo $message;?></h2>
+        <h2 class="results_number">10問中<span><?php echo $score;?></span>問正解！<?php echo $message;?></h2>
 
         <div class="answer">
             <h2 class="result"> Q1 <span><?php echo $q1?></span></h2>
@@ -426,7 +459,11 @@
                 </div>
             </div><!--answer-->
 
-        <p　class="again"><a href="part2.php" class="again">もう一度挑戦する</a></p>
+        
+        <p　class="again"><a href="part1.php" class="again">もう一度挑戦する</a></p>
+        <br>
+        <p　class="again"><a href="site.php" class="again">クイズトップに戻る</a></p>
+
 
  </section><!--main wrapper-->
 
@@ -442,5 +479,5 @@
     </nav>
 </section>
 </body>
-
+<script src="menu.js"></script>
 </html>
